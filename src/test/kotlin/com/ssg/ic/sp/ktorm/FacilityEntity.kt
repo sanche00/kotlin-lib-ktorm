@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.entity.Entity
+import org.ktorm.entity.add
 import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
 import org.ktorm.schema.Table
@@ -26,7 +27,7 @@ import org.ktorm.schema.varchar
 interface Facility : Entity<Facility> {
     companion object : Entity.Factory<Facility>()
 
-    val cd: String
+    var cd: String
     var nm: String
     var level: Int
     var parent: String
@@ -47,10 +48,10 @@ class KtormTest2 {
     fun dslSelectTest() {
 
         val database = Database.connect(
-            System.getProperty("WRITE_JDBC_URL"),
-            driver = System.getProperty("DB_DRIVER"),
-            user = System.getProperty("WRITE_DB_USER"),
-            password = System.getProperty("WRITE_DB_PWD")
+            url = System.getenv("WRITE_JDBC_URL"),
+            driver = System.getenv("DB_DRIVER"),
+            user = System.getenv("WRITE_DB_USER"),
+            password = System.getenv("WRITE_DB_PWD")
         )
         val ret = database.from(Facilities).select()
 
@@ -61,13 +62,12 @@ class KtormTest2 {
 
     @Test
     fun dslPoolTest() {
-
         val hikariConfig = HikariConfig().apply {
-            driverClassName = System.getProperty("DB_DRIVER")
-            jdbcUrl = System.getProperty("WRITE_JDBC_URL")
+            driverClassName = System.getenv("DB_DRIVER")
+            jdbcUrl = System.getenv("WRITE_JDBC_URL")
             maximumPoolSize = 3
-            username = System.getProperty("WRITE_DB_USER")
-            password = System.getProperty("WRITE_DB_PWD")
+            username = System.getenv("WRITE_DB_USER")
+            password = System.getenv("WRITE_DB_PWD")
             isAutoCommit = false
             addDataSourceProperty("cachePrepStmts", "true")
             addDataSourceProperty("prepStmtCacheSize", "250")
@@ -76,7 +76,16 @@ class KtormTest2 {
         }
         val database = Database.connect(HikariDataSource(hikariConfig))
         val ret = database.facilities.find { it.cd eq "0001" }
-        println(ret)
+        if (ret != null) {
+            println(ret.cd)
+        }
+        database.facilities.add(Facility{
+            cd = "test"
+            nm = "test"
+            level = 1
+            parent = "test"
+            alias_nm = "test"
+        })
 //        val ret = database.from(Facilities).select()
 //
 //        Assertions.assertTrue(ret.rowSet.next())
