@@ -7,6 +7,14 @@ import org.ktorm.schema.Table
 import org.ktorm.schema.int
 import org.ktorm.schema.varchar
 
+//CREATE TABLE public.facility (
+//cd bpchar(20) NOT NULL,
+//nm text NOT NULL,
+//"level" numeric(1) NOT NULL,
+//parent bpchar(20) NULL DEFAULT NULL::bpchar,
+//alias_nm bpchar(40) NULL,
+//CONSTRAINT facility_pkey PRIMARY KEY (cd)
+//);
 object Departments : Table<Nothing>("t_department") {
     val id = int("id").primaryKey()
     val name = varchar("name")
