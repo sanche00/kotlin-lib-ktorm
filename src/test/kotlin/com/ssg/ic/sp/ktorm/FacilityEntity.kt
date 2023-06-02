@@ -1,5 +1,9 @@
 package com.ssg.ic.sp.ktorm
 
+import com.ssg.ic.sp.db.ENV_DB_DRIVER
+import com.ssg.ic.sp.db.ENV_DB_WRITE_PWD
+import com.ssg.ic.sp.db.ENV_DB_WRITE_URL
+import com.ssg.ic.sp.db.ENV_DB_WRITE_USER
 import com.ssg.ic.sp.ktorm.Departments.primaryKey
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -7,10 +11,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
-import org.ktorm.entity.Entity
-import org.ktorm.entity.add
-import org.ktorm.entity.find
-import org.ktorm.entity.sequenceOf
+import org.ktorm.entity.*
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
 import org.ktorm.schema.text
@@ -24,7 +25,7 @@ import org.ktorm.schema.varchar
 //alias_nm bpchar(40) NULL,
 //CONSTRAINT facility_pkey PRIMARY KEY (cd)
 //);
-interface Facility : Entity<Facility> {
+interface Facility : Entity<Facility>{
     companion object : Entity.Factory<Facility>()
 
     var cd: String
@@ -32,9 +33,11 @@ interface Facility : Entity<Facility> {
     var level: Int
     var parent: String
     var alias_nm: String
+
+
 }
 
-object Facilities2 : Table<Facility>("facility"){
+object Facilities2 : Table<Facility>("facility") {
 
     val cd = varchar("cd").primaryKey().bindTo { it.cd }
     val nm = text("nm").bindTo { it.nm }
@@ -42,17 +45,33 @@ object Facilities2 : Table<Facility>("facility"){
     val parent = varchar("parent").bindTo { it.parent }
     val alias_nm = varchar("alias_nm").bindTo { it.alias_nm }
 }
+
 class KtormTest2 {
 
     @Test
     fun dslSelectTest() {
-
-        val database = Database.connect(
-            url = System.getenv("WRITE_JDBC_URL"),
-            driver = System.getenv("DB_DRIVER"),
-            user = System.getenv("WRITE_DB_USER"),
-            password = System.getenv("WRITE_DB_PWD")
+        System.setProperty(ENV_DB_DRIVER, "org.postgresql.Driver")
+        System.setProperty(
+            ENV_DB_WRITE_URL,
+            "jdbc:postgresql://sellpick-dev-main.cluster-c6bwy8w0ihhy.ap-northeast-2.rds.amazonaws.com:5432/sellpickdevSales"
         )
+        System.setProperty(ENV_DB_WRITE_USER, "us_sellpick")
+        System.setProperty(ENV_DB_WRITE_PWD, "us_sellpick")
+
+        val hikariConfig = HikariConfig().apply {
+            driverClassName = System.getProperty(ENV_DB_DRIVER)
+            jdbcUrl = System.getProperty(ENV_DB_WRITE_URL)
+            maximumPoolSize = 3
+            username = System.getProperty(ENV_DB_WRITE_USER)
+            password =  System.getProperty(ENV_DB_WRITE_PWD)
+            isAutoCommit = false
+            addDataSourceProperty("cachePrepStmts", "true")
+            addDataSourceProperty("prepStmtCacheSize", "250")
+            addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
+            validate()
+        }
+        val database = Database.connect(HikariDataSource(hikariConfig))
+
         val ret = database.from(Facilities).select()
 
         Assertions.assertTrue(ret.rowSet.next())
@@ -62,12 +81,20 @@ class KtormTest2 {
 
     @Test
     fun dslPoolTest() {
+        System.setProperty(ENV_DB_DRIVER, "org.postgresql.Driver")
+        System.setProperty(
+            ENV_DB_WRITE_URL,
+            "jdbc:postgresql://sellpick-dev-main.cluster-c6bwy8w0ihhy.ap-northeast-2.rds.amazonaws.com:5432/sellpickdevSales"
+        )
+        System.setProperty(ENV_DB_WRITE_USER, "us_sellpick")
+        System.setProperty(ENV_DB_WRITE_PWD, "us_sellpick")
+
         val hikariConfig = HikariConfig().apply {
-            driverClassName = System.getenv("DB_DRIVER")
-            jdbcUrl = System.getenv("WRITE_JDBC_URL")
+            driverClassName = System.getProperty(ENV_DB_DRIVER)
+            jdbcUrl = System.getProperty(ENV_DB_WRITE_URL)
             maximumPoolSize = 3
-            username = System.getenv("WRITE_DB_USER")
-            password = System.getenv("WRITE_DB_PWD")
+            username = System.getProperty(ENV_DB_WRITE_USER)
+            password =  System.getProperty(ENV_DB_WRITE_PWD)
             isAutoCommit = false
             addDataSourceProperty("cachePrepStmts", "true")
             addDataSourceProperty("prepStmtCacheSize", "250")
@@ -79,6 +106,8 @@ class KtormTest2 {
         if (ret != null) {
             println(ret.cd)
         }
+
+
         database.facilities.add(Facility{
             cd = "test"
             nm = "test"

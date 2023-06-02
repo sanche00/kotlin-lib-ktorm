@@ -1,5 +1,9 @@
 package com.ssg.ic.sp.ktorm
 
+import com.ssg.ic.sp.db.ENV_DB_DRIVER
+import com.ssg.ic.sp.db.ENV_DB_WRITE_PWD
+import com.ssg.ic.sp.db.ENV_DB_WRITE_URL
+import com.ssg.ic.sp.db.ENV_DB_WRITE_USER
 import com.ssg.ic.sp.ktorm.Departments.primaryKey
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -44,13 +48,20 @@ class KtormTest {
 
     @Test
     fun dslPoolTest() {
+        System.setProperty(ENV_DB_DRIVER, "org.postgresql.Driver")
+        System.setProperty(
+            ENV_DB_WRITE_URL,
+            "jdbc:postgresql://sellpick-dev-main.cluster-c6bwy8w0ihhy.ap-northeast-2.rds.amazonaws.com:5432/sellpickdevSales"
+        )
+        System.setProperty(ENV_DB_WRITE_USER, "us_sellpick")
+        System.setProperty(ENV_DB_WRITE_PWD, "us_sellpick")
 
         val hikariConfig = HikariConfig().apply {
-            driverClassName = System.getProperty("DB_DRIVER")
-            jdbcUrl = System.getProperty("WRITE_JDBC_URL")
+            driverClassName = System.getProperty(ENV_DB_DRIVER)
+            jdbcUrl = System.getProperty(ENV_DB_WRITE_URL)
             maximumPoolSize = 3
-            username = System.getProperty("WRITE_DB_USER")
-            password =  System.getProperty("WRITE_DB_PWD")
+            username = System.getProperty(ENV_DB_WRITE_USER)
+            password =  System.getProperty(ENV_DB_WRITE_PWD)
             isAutoCommit = false
             addDataSourceProperty("cachePrepStmts", "true")
             addDataSourceProperty("prepStmtCacheSize", "250")
