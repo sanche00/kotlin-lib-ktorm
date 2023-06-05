@@ -7,12 +7,12 @@ kotlin-db-common 을 사용하여 Kotlin orm ktorm 용 repository 구현
 
 1) KtormDatabase 생성
 
-```aidl
+```
 val ktormDatabase = KtormDatabase(dualDataBase)
 ```
 
 2) Repository 
-```aidl
+```
 interface CityRepository<DATABASE, TRAN> : Repository<DATABASE, TRAN> {
     fun save(city: City, database: DATABASE): Int
 }
@@ -24,7 +24,7 @@ class CityRepositoryImpl(repository: Repository<Database, Transaction>) : CityRe
 ```
 
 3) 사용
-```aidl
+```
 val cityRepository = CityRepositoryImpl(KtormRepository(ktormDatabase))
 
 var ret = cityRepository.save(City {
@@ -35,7 +35,7 @@ var ret = cityRepository.save(City {
 ```
 
 4) test Fake Bean
-```aidl
+```
 class FakeCityRepository(repository: Repository<Any, Any>) : CityRepository<Any, Any>, Repository<Any, Any> by repository {
 
     val memoryCities = mutableListOf<City>()
